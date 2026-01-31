@@ -200,6 +200,8 @@ pipewire
 pipewire-alsa
 pipewire-pulse
 wireplumber
+xorg-xhost
+libxkbcommon
 # AUR Packages from ml4w-arch-repo
 wlogout
 waypaper
