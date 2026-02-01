@@ -1,5 +1,11 @@
 #!/bin/bash
 
+figlet -f smslant "Flatpaks"
+
+if [ -d ./airootfs/var/lib/flatpak ]; then
+    sudo rm -rf ./airootfs/var/lib/flatpak
+fi
+
 # 1. Configuration
 # We use realpath to ensure these are absolute paths
 PROFILE_DIR=$(realpath "./airootfs")
@@ -15,13 +21,13 @@ export FLATPAK_SYSTEM_DIR="$PROFILE_DIR/var/lib/flatpak"
 export FLATPAK_CONFIG_DIR="$PROFILE_DIR/etc/flatpak"
 export DBUS_SYSTEM_BUS_ADDRESS=""
 
-echo "Staging Flatpaks in: $PROFILE_DIR"
+echo ":: Staging Flatpaks in: $PROFILE_DIR"
 
 # Ensure directories exist
 mkdir -p "$FLATPAK_SYSTEM_DIR" "$FLATPAK_CONFIG_DIR"
 
 # 4. Add Remotes
-echo "Adding remotes..."
+echo ":: Adding remotes..."
 
 # Adding Flathub
 sudo -E flatpak remote-add --system --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
@@ -43,9 +49,9 @@ ML4W_APPS=(
     "com.ml4w.hyprlandsettings"
 )
 
-echo "Installing ML4W Apps..."
+echo ":: Installing ML4W Apps..."
 for app in "${ML4W_APPS[@]}"; do
-    echo "--> Installing $app"
+    echo "   --> Installing $app"
     # Note: We use --system to match our FLATPAK_SYSTEM_DIR
     sudo -E flatpak install --system ml4w-repo "$app" -y --noninteractive
 done
@@ -54,17 +60,18 @@ APPS=(
     "com.ml4w.dotfilesinstaller"
 )
 
-echo "Installing ML4W Apps..."
+echo ":: Installing ML4W Apps..."
 for app in "${APPS[@]}"; do
-    echo "--> Installing $app"
+    echo "   --> Installing $app"
     # Note: We use --system to match our FLATPAK_SYSTEM_DIR
     sudo -E flatpak install --system "$app" -y --noninteractive
 done
 
 # 6. Restore environment variables
-echo "Cleaning up environment variables..."
+echo ":: Cleaning up environment variables..."
 export FLATPAK_SYSTEM_DIR="$OLD_SYSTEM_DIR"
 export FLATPAK_CONFIG_DIR="$OLD_CONFIG_DIR"
 export DBUS_SYSTEM_BUS_ADDRESS="$OLD_DBUS"
 
-echo "Done! Flatpaks are now prepared in $PROFILE_DIR"
+echo ":: Done! Flatpaks are now prepared in $PROFILE_DIR"
+echo
