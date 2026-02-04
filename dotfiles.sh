@@ -2,6 +2,8 @@
 
 figlet -f smslant "Dotfiles"
 
+SOURCE_DOTFILES="com.ml4w.dotfiles.stable"
+VERSION="2.10.0"
 SKEL_FOLDER="./airootfs/etc/skel"
 DOTFILES="$SKEL_FOLDER/.mydotfiles/com.ml4w.dotfiles.stable"
 
@@ -16,15 +18,26 @@ if [ -d $SKEL_FOLDER/.config ]; then
 fi
 
 # Create Dotfiles Folder
-mkdir -p $SKEL_FOLDER/.mydotfiles
-echo ":: $SKEL_FOLDER/.mydotfiles created"
+mkdir -p $SKEL_FOLDER/.mydotfiles/$SOURCE_DOTFILES
+echo ":: $SKEL_FOLDER/.mydotfiles/$SOURCE_DOTFILES created"
 
 mkdir -p $SKEL_FOLDER/.config
 echo ":: $$SKEL_FOLDER/.config created"
 
+# Clone Latest Version
+if [ -d ~/.cache/ml4w-iso ]; then
+    rm -rf ~/.cache/ml4w-iso
+fi
+mkdir -p ~/.cache/ml4w-iso
+git clone --depth 1 --branch $VERSION https://github.com/mylinuxforwork/dotfiles ~/.cache/ml4w-iso
+
 # Copy current configuration
-cp -rf $HOME/.mydotfiles/com.ml4w.dotfiles.stable $SKEL_FOLDER/.mydotfiles
-echo ":: $HOME/.mydotfiles/com.ml4w.dotfiles.stable copied to $SKEL_FOLDER/.mydotfiles"
+cp -rf ~/.cache/ml4w-iso/dotfiles/. $SKEL_FOLDER/.mydotfiles/$SOURCE_DOTFILES
+echo ":: ~/.cache/ml4w-iso/dotfiles/. copied to $SKEL_FOLDER/.mydotfiles/$SOURCE_DOTFILES"
+
+# Copy local dotinst
+cp ~/.mydotfiles/$SOURCE_DOTFILES/config.dotinst $SKEL_FOLDER/.mydotfiles/$SOURCE_DOTFILES
+echo ":: ~/.mydotfiles/$SOURCE_DOTFILES/config.dotinst copied to $SKEL_FOLDER/.mydotfiles/$SOURCE_DOTFILES"
 
 # Check home
 files=$(ls -a $DOTFILES)

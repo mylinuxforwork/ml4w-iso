@@ -9,7 +9,7 @@ echo
 ./flatpaks.sh
 
 # Install stable dotfiles
-./dotfiles.sh
+# ./dotfiles.sh
 
 # 1. Clean up old build artifacts
 echo ":: Cleaning up previous builds..."
