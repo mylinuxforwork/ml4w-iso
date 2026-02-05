@@ -76,7 +76,7 @@ _install_flatpaks() {
     export FLATPAK_CONFIG_DIR="$PROFILE_FOLDER/airootfs/etc/flatpak"
     export DBUS_SYSTEM_BUS_ADDRESS=""
 
-    echo ":: Staging Flatpaks in: $FLATPAK_CONFIG_DIR..."
+    echo ":: Staging Flatpaks in: $FLATPAK_SYSTEM_DIR..."
     mkdir -p "$FLATPAK_SYSTEM_DIR" "$FLATPAK_CONFIG_DIR"
 
     echo ":: Adding Remotes..."
@@ -89,14 +89,14 @@ _install_flatpaks() {
     fi
 
     echo ":: Installing ML4W Flatpak Apps..."
-    for app in "${ML4W_APPS[@]}"; do
+    for app in "${FLATPAKS_ML4W[@]}"; do
         echo "   --> Installing $app"
         # Note: We use --system to match our FLATPAK_SYSTEM_DIR
         sudo -E flatpak install --system ml4w-repo "$app" -y --noninteractive
     done
 
     echo ":: Installing Flatpak Apps..."
-    for app in "${APPS[@]}"; do
+    for app in "${FLATPAKS_APPS[@]}"; do
         echo "   --> Installing $app"
         # Note: We use --system to match our FLATPAK_SYSTEM_DIR
         sudo -E flatpak install --system "$app" -y --noninteractive
@@ -107,7 +107,7 @@ _install_flatpaks() {
     export FLATPAK_CONFIG_DIR="$OLD_CONFIG_DIR"
     export DBUS_SYSTEM_BUS_ADDRESS="$OLD_DBUS"
 
-    echo ":: Done! Flatpaks are now prepared in $PROFILE_FOLDER"
+    echo ":: Done! Flatpaks are now prepared in $FLATPAK_SYSTEM_DIR"
 }
 
 _install_dotfiles() {
@@ -179,13 +179,12 @@ _install_dotfiles() {
 
 _build_iso() {
     figlet -f smslant "Build ISO"
-
-    cd $PROFILE_FOLDER
     sudo mkarchiso -v -w /tmp/archiso-tmp -o $OUT_FOLDER $PROFILE_FOLDER
 }
 
 # Start
-figlet -f smslant "ML4W ISO"
+figlet -f smslant "ML4W OS ISO"
+echo ":: Starting ML4W OS ISO build..."
 
 _prepare
 _permissions
