@@ -196,6 +196,9 @@ ttf-jetbrains-mono-nerd
 swww
 base-devel
 sddm
+qt6-svg
+qt6-virtualkeyboard
+qt6-multimedia-ffmpeg
 pipewire
 pipewire-alsa
 pipewire-pulse
