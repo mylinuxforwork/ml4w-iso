@@ -11,6 +11,7 @@ PUBLIC_KEY=$(realpath "$HOME/ml4w-apps-public-key.asc")
 SKEL_FOLDER="$PROFILE_FOLDER/airootfs/etc/skel"
 DOTFILES="$SKEL_FOLDER/.mydotfiles/com.ml4w.dotfiles.stable"
 CACHE_FOLDER="$HOME/.cache/ml4w-iso"
+TMP_FOLDER="$HOME/.cache/ml4w-tmp"
 
 FLATPAKS_ML4W=(
     "com.ml4w.welcome"
@@ -173,6 +174,30 @@ _install_dotfiles() {
     echo ":: Done! Dotfiles are installed in $SKEL_FOLDER"
 }
 
+_install_sddm_theme() {
+    echo ":: Starting installation of the ML4W SDDM theme..."
+    
+    echo ":: Creating temporary directory..."
+    rm -rf $TMP_FOLDER
+    mkdir -p $TMP_FOLDER
+    
+    echo ":: Cloning theme into temporary directory..."
+    git clone --depth 1 https://github.com/mylinuxforwork/ml4w-sddm $TMP_FOLDER/ml4w-sddm
+
+    echo ":: Copy theme to sddm folder..."
+    sudo mkdir -p $PROFILE_FOLDER/airootfs/usr/share/sddm/themes/ml4w/
+    sudo cp -rf $TMP_FOLDER/ml4w-sddm/. $PROFILE_FOLDER/airootfs/usr/share/sddm/themes/ml4w/
+
+    echo ":: Copy sddm.conf..."
+    sudo cp -rf $TMP_FOLDER/ml4w-sddm/sddm.conf $PROFILE_FOLDER/airootfs/etc
+
+    echo ":: Cleaning up..."
+    rm -rf $TMP_FOLDER
+
+    echo ":: ML4W SDDM theme installed succesfully"
+    
+}
+
 _build_iso() {
     figlet -f smslant "Build ISO"
     sudo mkarchiso -v -w /tmp/archiso-tmp -o $OUT_FOLDER $PROFILE_FOLDER
@@ -185,6 +210,7 @@ echo ":: Starting ML4W OS ISO build..."
 _prepare
 _permissions
 _install_flatpaks
+_install_sddm_theme
 _install_dotfiles
 _build_iso
 
