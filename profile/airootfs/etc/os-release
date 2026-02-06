@@ -1,6 +1,6 @@
-NAME="ML4W Dotfiles for Hyprland"
-PRETTY_NAME="ML4W Dotfiles"
-ID=ml4w
+NAME="ML4W OS"
+PRETTY_NAME="ML4W OS"
+ID=ml4wos
 ID_LIKE=arch
 BUILD_ID=rolling
 ANSI_COLOR="38;2;23;147;209"

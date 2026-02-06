@@ -157,12 +157,21 @@ if [ "$TEST_MODE" = false ]; then
     sed -i "s|^GRUB_CMDLINE_LINUX_DEFAULT=.*|GRUB_CMDLINE_LINUX_DEFAULT=\"root=UUID=$ROOT_UUID rootflags=subvol=@ rw\"|" /etc/default/grub
     grub-mkconfig -o /boot/grub/grub.cfg
     
+    echo "Setting Hostname..."
     echo "$NEW_HOSTNAME" > /etc/hostname
+
+    echo "Setting password for root..."
+    echo "root:root" | chpasswd
+
+    echo "Adding new user..."
     useradd -m -G wheel -s /bin/bash "$NEW_USER"
     echo "$NEW_USER:$NEW_PASS" | chpasswd
     sed -i 's/# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
-    
+
+    echo "Enabling NetworkManager..."    
     systemctl enable NetworkManager
+
+    echo "Enabling sddm..."    
     systemctl enable sddm
 EOF
     umount -R /mnt

@@ -138,9 +138,6 @@ _install_dotfiles() {
     echo ":: Cloning $GITHUB_DOTFILES"
     git clone --depth 1 --branch $VERSION $GITHUB_DOTFILES $CACHE_FOLDER
 
-    echo ":: Renaming hypridle.conf..."
-    mv $CACHE_FOLDER/dotfiles/.config/hypr/hypridle.conf $CACHE_FOLDER/dotfiles/.config/hypr/hypridle.bak
-
     echo ":: Copying $CACHE_FOLDER/dotfiles/. to $SKEL_FOLDER/.mydotfiles/$DOTFILES_SOURCE"
     cp -rf $CACHE_FOLDER/dotfiles/. $SKEL_FOLDER/.mydotfiles/$DOTFILES_SOURCE
 
