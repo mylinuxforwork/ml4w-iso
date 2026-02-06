@@ -15,6 +15,10 @@ if ! ping -c 1 8.8.8.8 &>/dev/null; then
    exit 1
 fi
 
+figlet -f smslant "ML4W OS Install"
+echo ":: This script will install ML4W OS to your hard drive."
+echo
+
 # --- 2. Setup ---
 TEST_MODE=false
 [[ "$1" == "--test" ]] && TEST_MODE=true
@@ -38,7 +42,7 @@ while [[ -z "$NEW_PASS" ]]; do NEW_PASS=$(gum input --password --placeholder "Pa
 
 # 5. Summary
 clear
-gum style --border double --margin "1" --padding "1" --foreground "#cba6f7" "INSTALLATION SUMMARY"
+figlet -f smslant "Summary"
 echo "  User:      $NEW_USER"
 echo "  Hostname:  $NEW_HOSTNAME"
 echo "  Drive:     $TARGET_DRIVE"
@@ -83,7 +87,14 @@ if [ "$TEST_MODE" = false ]; then
     if [ "$IS_EFI" = true ]; then mount "$EFI_PART" /mnt/boot; fi
 fi
 
-echo "==> Step 4: Cloning System..."
+echo "==> Step 4: Preparing Skeleton..."
+if [ -f /etc/skel/.mydotfiles/com.ml4w.dotfiles/stable/.config/hypr/hypridle.bak ]; then
+    mv /etc/skel/.mydotfiles/com.ml4w.dotfiles/stable/.config/hypr/hypridle.bak /etc/skel/.mydotfiles/com.ml4w.dotfiles/stable/.config/hypr/hypridle.conf
+else
+    echo "ERROR: /etc/skel/.mydotfiles/com.ml4w.dotfiles/stable/.config/hypr/hypridle.bak doesn't exist."
+fi
+
+echo "==> Step 5: Cloning System..."
 if [ "$TEST_MODE" = false ]; then
     rsync -aAXhW --numeric-ids --info=progress2 \
         --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/lost+found"} \
@@ -93,7 +104,7 @@ if [ "$TEST_MODE" = false ]; then
         / /mnt/
 fi
 
-echo "==> Step 5: Configuration (Chroot)..."
+echo "==> Step 6: Configuration (Chroot)..."
 if [ "$TEST_MODE" = false ]; then
     genfstab -U /mnt >> /mnt/etc/fstab
     cp --remove-destination /etc/resolv.conf /mnt/etc/resolv.conf
@@ -157,4 +168,15 @@ EOF
     umount -R /mnt
 fi
 
-gum style --foreground "#a6e3a1" --border rounded --margin 1 --padding 1 "Installation Complete. Reboot and enjoy!"
+echo "==> Step 7: Cleaning up..."
+if [ -f /etc/skel/.mydotfiles/com.ml4w.dotfiles/stable/.config/hypr/hypridle.conf ]; then
+    mv /etc/skel/.mydotfiles/com.ml4w.dotfiles/stable/.config/hypr/hypridle.conf /etc/skel/.mydotfiles/com.ml4w.dotfiles/stable/.config/hypr/hypridle.bak
+else
+    echo "ERROR: /etc/skel/.mydotfiles/com.ml4w.dotfiles/stable/.config/hypr/hypridle.conf doesn't exist."
+fi
+
+figlet -f smslant "Done!"
+echo ":: Installation Complete. Reboot and enjoy ML4W OS!"
+if gum confirm "Do you want to reboot your system now?"; then
+    reboot
+fi

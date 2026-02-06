@@ -91,14 +91,12 @@ _install_flatpaks() {
     echo ":: Installing ML4W Flatpak Apps..."
     for app in "${FLATPAKS_ML4W[@]}"; do
         echo "   --> Installing $app"
-        # Note: We use --system to match our FLATPAK_SYSTEM_DIR
         sudo -E flatpak install --system ml4w-repo "$app" -y --noninteractive
     done
 
     echo ":: Installing Flatpak Apps..."
     for app in "${FLATPAKS_APPS[@]}"; do
         echo "   --> Installing $app"
-        # Note: We use --system to match our FLATPAK_SYSTEM_DIR
         sudo -E flatpak install --system "$app" -y --noninteractive
     done
 
@@ -123,15 +121,12 @@ _install_dotfiles() {
         rm -rf $SKEL_FOLDER/.config
     fi
 
-    # Create Dotfiles Folder
     echo ":: Creating $SKEL_FOLDER/.mydotfiles/$DOTFILES_SOURCE"
     mkdir -p $SKEL_FOLDER/.mydotfiles/$DOTFILES_SOURCE
 
-    # Create .config Folder
     echo ":: Creating $SKEL_FOLDER/.config"
     mkdir -p $SKEL_FOLDER/.config
 
-    # Clone Latest Version
     echo ":: Removing $CACHE_FOLDER"
     if [ -d $CACHE_FOLDER ]; then
         rm -rf $CACHE_FOLDER
@@ -142,11 +137,12 @@ _install_dotfiles() {
     echo ":: Cloning $GITHUB_DOTFILES"
     git clone --depth 1 --branch $VERSION $GITHUB_DOTFILES $CACHE_FOLDER
 
-    # Copy current configuration
+    echo ":: Renaming hypridle.conf..."
+    mv $CACHE_FOLDER/dotfiles/.config/hypr/hypridle.conf $CACHE_FOLDER/dotfiles/.config/hypr/hypridle.bak
+
     echo ":: Copying $CACHE_FOLDER/dotfiles/. to $SKEL_FOLDER/.mydotfiles/$DOTFILES_SOURCE"
     cp -rf $CACHE_FOLDER/dotfiles/. $SKEL_FOLDER/.mydotfiles/$DOTFILES_SOURCE
 
-    # Copy local dotinst
     echo ":: Copying local ~/.mydotfiles/$DOTFILES_SOURCE/config.dotinst to $SKEL_FOLDER/.mydotfiles/$DOTFILES_SOURCE"
     cp ~/.mydotfiles/$DOTFILES_SOURCE/config.dotinst $SKEL_FOLDER/.mydotfiles/$DOTFILES_SOURCE
 
