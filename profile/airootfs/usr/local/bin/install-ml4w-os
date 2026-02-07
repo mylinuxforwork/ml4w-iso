@@ -35,10 +35,12 @@ ROOT_PART="${TARGET_DRIVE}${P}2"
 # 4. Input Validation
 NEW_HOSTNAME=""
 while [[ -z "$NEW_HOSTNAME" ]]; do NEW_HOSTNAME=$(gum input --placeholder "Hostname"); done
+ROOT_PASS=""
+while [[ -z "$ROOT_PASS" ]]; do ROOT_PASS=$(gum input --password --placeholder "Root Password"); done
 NEW_USER=""
 while [[ -z "$NEW_USER" ]]; do NEW_USER=$(gum input --placeholder "Username"); done
 NEW_PASS=""
-while [[ -z "$NEW_PASS" ]]; do NEW_PASS=$(gum input --password --placeholder "Password"); done
+while [[ -z "$NEW_PASS" ]]; do NEW_PASS=$(gum input --password --placeholder "User Password"); done
 
 # 5. Summary
 clear
@@ -161,7 +163,7 @@ if [ "$TEST_MODE" = false ]; then
     echo "$NEW_HOSTNAME" > /etc/hostname
 
     echo "Setting password for root..."
-    echo "root:root" | chpasswd
+    echo "root:$ROOT_PASS" | chpasswd
 
     echo "Adding new user..."
     useradd -m -G wheel -s /bin/bash "$NEW_USER"
