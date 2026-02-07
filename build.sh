@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Configuration
-VERSION="2.10.0"
+TAG="2.10.0"
+VERSION="stable"
 DOTFILES_SOURCE="com.ml4w.dotfiles.stable"
 GITHUB_DOTFILES="https://github.com/mylinuxforwork/dotfiles"
 BUILD_FOLDER="$HOME/builds/ml4w-iso"
@@ -136,8 +137,11 @@ _install_dotfiles() {
     mkdir -p $CACHE_FOLDER
 
     echo ":: Cloning $GITHUB_DOTFILES"
-    git clone --depth 1 --branch $VERSION $GITHUB_DOTFILES $CACHE_FOLDER
-
+    if [ $VERSION == "stable" ]; then
+        git clone --depth 1 --branch $TAG $GITHUB_DOTFILES $CACHE_FOLDER
+    else
+        git clone --depth 1 $GITHUB_DOTFILES $CACHE_FOLDER
+    fi
     echo ":: Copying $CACHE_FOLDER/dotfiles/. to $SKEL_FOLDER/.mydotfiles/$DOTFILES_SOURCE"
     cp -rf $CACHE_FOLDER/dotfiles/. $SKEL_FOLDER/.mydotfiles/$DOTFILES_SOURCE
 
