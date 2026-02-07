@@ -34,7 +34,6 @@ fsarchiver
 gpart
 gpm
 gptfdisk
-# grml-zsh-config
 grub
 hdparm
 hyperv
@@ -136,6 +135,7 @@ jq
 flatpak
 vim
 inotify-tools
+adwaita-icon-theme
 gnome-themes-extra
 hyprpaper
 hyprlock
