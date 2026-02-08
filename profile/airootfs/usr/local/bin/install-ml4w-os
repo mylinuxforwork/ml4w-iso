@@ -54,9 +54,11 @@ echo ""
 gum confirm "WARNING: This will wipe $TARGET_DRIVE. Continue?" || exit 1
 
 set -e 
-
 # --- EXECUTION ---
+
+echo 
 echo ":: Step 1: Partitioning..."
+echo
 if [ "$TEST_MODE" = false ]; then
     sgdisk -Z $TARGET_DRIVE
     if [ "$IS_EFI" = true ]; then
@@ -70,13 +72,17 @@ if [ "$TEST_MODE" = false ]; then
     sleep 2
 fi
 
+echo
 echo ":: Step 2: Formatting..."
+echo
 if [ "$TEST_MODE" = false ]; then
     if [ "$IS_EFI" = true ]; then mkfs.vfat -F 32 "$EFI_PART"; fi
     mkfs.btrfs -L ARCH_ROOT -f "$ROOT_PART"
 fi
 
+echo
 echo ":: Step 3: Btrfs Subvolumes..."
+echo
 if [ "$TEST_MODE" = false ]; then
 
     echo ":: Mounting root temporarily to create subvolumes..."
@@ -114,14 +120,9 @@ if [ "$TEST_MODE" = false ]; then
     fi
 fi
 
-echo ":: Step 4: Preparing Skeleton..."
-if [ -f /etc/skel/.mydotfiles/com.ml4w.dotfiles/stable/.config/hypr/hypridle.bak ]; then
-    mv /etc/skel/.mydotfiles/com.ml4w.dotfiles/stable/.config/hypr/hypridle.bak /etc/skel/.mydotfiles/com.ml4w.dotfiles/stable/.config/hypr/hypridle.conf
-else
-    echo "ERROR: /etc/skel/.mydotfiles/com.ml4w.dotfiles/stable/.config/hypr/hypridle.bak doesn't exist."
-fi
-
-echo ":: Step 5: Cloning System..."
+echo
+echo ":: Step 4: Cloning System..."
+echo
 if [ "$TEST_MODE" = false ]; then
     rsync -aAXhW --numeric-ids --info=progress2 \
         --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/lost+found"} \
@@ -131,7 +132,9 @@ if [ "$TEST_MODE" = false ]; then
         / /mnt/
 fi
 
-echo ":: Step 6: Configuration (Chroot)..."
+echo
+echo ":: Step 5: Configuration (Chroot)..."
+echo
 if [ "$TEST_MODE" = false ]; then
     genfstab -U /mnt >> /mnt/etc/fstab
     cp --remove-destination /etc/resolv.conf /mnt/etc/resolv.conf
