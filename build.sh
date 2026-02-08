@@ -197,7 +197,11 @@ _install_sddm_theme() {
     rm -rf $TMP_FOLDER
 
     echo ":: ML4W SDDM theme installed succesfully"
-    
+}
+
+_install_ohmyzsh() {
+    echo ":: Copying local .oh-my-zsh configuration to $SKEL_FOLDER..."
+    cp -rf $HOME/.oh-my-zsh $SKEL_FOLDER
 }
 
 _build_iso() {
@@ -214,6 +218,7 @@ _permissions
 _install_flatpaks
 _install_sddm_theme
 _install_dotfiles
+_install_ohmyzsh
 _build_iso
 
 echo ":: Done! Check the ./out folder for your ISO."

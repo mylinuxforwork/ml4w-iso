@@ -9,7 +9,7 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-echo "==> Checking internet..."
+echo ":: Checking internet..."
 if ! ping -c 1 8.8.8.8 &>/dev/null; then
    gum style --foreground "#f38ba8" "ERROR: Internet required."
    exit 1
@@ -56,7 +56,7 @@ gum confirm "WARNING: This will wipe $TARGET_DRIVE. Continue?" || exit 1
 set -e 
 
 # --- EXECUTION ---
-echo "==> Step 1: Partitioning..."
+echo ":: Step 1: Partitioning..."
 if [ "$TEST_MODE" = false ]; then
     sgdisk -Z $TARGET_DRIVE
     if [ "$IS_EFI" = true ]; then
@@ -70,33 +70,58 @@ if [ "$TEST_MODE" = false ]; then
     sleep 2
 fi
 
-echo "==> Step 2: Formatting..."
+echo ":: Step 2: Formatting..."
 if [ "$TEST_MODE" = false ]; then
     if [ "$IS_EFI" = true ]; then mkfs.vfat -F 32 "$EFI_PART"; fi
     mkfs.btrfs -L ARCH_ROOT -f "$ROOT_PART"
 fi
 
-echo "==> Step 3: Btrfs Subvolumes..."
+echo ":: Step 3: Btrfs Subvolumes..."
 if [ "$TEST_MODE" = false ]; then
+
+    echo ":: Mounting root temporarily to create subvolumes..."
     mount "$ROOT_PART" /mnt
+    
+    echo ":: Creating subvolumes..."
     btrfs subvolume create /mnt/@
     btrfs subvolume create /mnt/@home
+    btrfs subvolume create /mnt/@log
+    btrfs subvolume create /mnt/@pkg
+    btrfs subvolume create /mnt/@.snapshots
+
+    echo ":: Unmounting to remount with correct options..."
     umount /mnt
     
+    echo ":: Mounting root..."
     mount -o noatime,compress=zstd,subvol=@ "$ROOT_PART" /mnt
-    mkdir -p /mnt/home /mnt/boot
+
+    echo ":: Creating directories..."
+    mkdir -p /mnt/home
+    mkdir -p /mnt/var/log
+    mkdir -p /mnt/var/cache/pacman/pkg
+    mkdir -p /mnt/.snapshots
+    mkdir -p /mnt/boot
+
+    echo ":: Mounting subvolumes..."
     mount -o noatime,compress=zstd,subvol=@home "$ROOT_PART" /mnt/home
-    if [ "$IS_EFI" = true ]; then mount "$EFI_PART" /mnt/boot; fi
+    mount -o noatime,compress=zstd,subvol=@log "$ROOT_PART" /mnt/var/log
+    mount -o noatime,compress=zstd,subvol=@pkg "$ROOT_PART" /mnt/var/cache/pacman/pkg
+    mount -o noatime,compress=zstd,subvol=@.snapshots "$ROOT_PART" /mnt/.snapshots
+
+    if [ "$IS_EFI" = true ]; then 
+        echo ":: Mounting EFI..."
+        mount "$EFI_PART" /mnt/boot; 
+    fi
 fi
 
-echo "==> Step 4: Preparing Skeleton..."
+echo ":: Step 4: Preparing Skeleton..."
 if [ -f /etc/skel/.mydotfiles/com.ml4w.dotfiles/stable/.config/hypr/hypridle.bak ]; then
     mv /etc/skel/.mydotfiles/com.ml4w.dotfiles/stable/.config/hypr/hypridle.bak /etc/skel/.mydotfiles/com.ml4w.dotfiles/stable/.config/hypr/hypridle.conf
 else
     echo "ERROR: /etc/skel/.mydotfiles/com.ml4w.dotfiles/stable/.config/hypr/hypridle.bak doesn't exist."
 fi
 
-echo "==> Step 5: Cloning System..."
+echo ":: Step 5: Cloning System..."
 if [ "$TEST_MODE" = false ]; then
     rsync -aAXhW --numeric-ids --info=progress2 \
         --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/lost+found"} \
@@ -106,12 +131,12 @@ if [ "$TEST_MODE" = false ]; then
         / /mnt/
 fi
 
-echo "==> Step 6: Configuration (Chroot)..."
+echo ":: Step 6: Configuration (Chroot)..."
 if [ "$TEST_MODE" = false ]; then
     genfstab -U /mnt >> /mnt/etc/fstab
     cp --remove-destination /etc/resolv.conf /mnt/etc/resolv.conf
 
-    echo "Waiting for UUID..."
+    echo ":: Waiting for UUID..."
     partprobe $TARGET_DRIVE
     udevadm settle
     sleep 2
@@ -124,7 +149,7 @@ if [ "$TEST_MODE" = false ]; then
     pacman-key --init
     pacman-key --populate archlinux
     
-    echo "Cleaning boot config..."
+    echo ":: Cleaning boot config..."
     pacman -Rns --noconfirm archiso || true
     rm -rf /etc/mkinitcpio.conf.d
     rm -f /etc/mkinitcpio.d/*.preset
@@ -135,7 +160,7 @@ if [ "$TEST_MODE" = false ]; then
     echo "FILES=()" >> /etc/mkinitcpio.conf
     echo "HOOKS=(base udev autodetect modconf kms keyboard keymap consolefont block filesystems fsck)" >> /etc/mkinitcpio.conf
     
-    echo "Removing Live User and Autologin configs..."
+    echo ":: Removing Live User and Autologin configs..."
     userdel -f -r liveuser || true
     rm -rf /etc/sddm.conf.d/*
     if [ -f /etc/sddm.conf ]; then
@@ -145,10 +170,12 @@ if [ "$TEST_MODE" = false ]; then
 
     rm -f /etc/sudoers.d/g_wheel
     rm -f /etc/sudoers.d/01_archiso
-
+    
+    echo ":: Installing Linux Packages..."
     pacman -Sy --noconfirm linux linux-firmware btrfs-progs grub $([ "$IS_EFI" = true ] && echo "efibootmgr")
     mkinitcpio -P
 
+    echo ":: Installing Grub..."
     if [ "$IS_EFI" = true ]; then
         grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB --recheck
     else
@@ -165,7 +192,7 @@ if [ "$TEST_MODE" = false ]; then
     echo "Setting password for root..."
     echo "root:$ROOT_PASS" | chpasswd
 
-    echo "Adding new user..."
+    echo "Adding new user '$NEW_USER'..."
     useradd -m -G wheel -s /bin/bash "$NEW_USER"
     echo "$NEW_USER:$NEW_PASS" | chpasswd
     sed -i 's/# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
@@ -179,15 +206,17 @@ EOF
     umount -R /mnt
 fi
 
-echo "==> Step 7: Cleaning up..."
+echo ":: Step 7: Cleaning up..."
 if [ -f /etc/skel/.mydotfiles/com.ml4w.dotfiles/stable/.config/hypr/hypridle.conf ]; then
     mv /etc/skel/.mydotfiles/com.ml4w.dotfiles/stable/.config/hypr/hypridle.conf /etc/skel/.mydotfiles/com.ml4w.dotfiles/stable/.config/hypr/hypridle.bak
 else
     echo "ERROR: /etc/skel/.mydotfiles/com.ml4w.dotfiles/stable/.config/hypr/hypridle.conf doesn't exist."
 fi
 
+echo
 figlet -f smslant "Done!"
 echo ":: Installation Complete. Reboot and enjoy ML4W OS!"
+echo
 if gum confirm "Do you want to reboot your system now?"; then
     reboot
 fi
