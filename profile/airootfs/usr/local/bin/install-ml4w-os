@@ -206,13 +206,6 @@ EOF
     umount -R /mnt
 fi
 
-echo ":: Step 7: Cleaning up..."
-if [ -f /etc/skel/.mydotfiles/com.ml4w.dotfiles/stable/.config/hypr/hypridle.conf ]; then
-    mv /etc/skel/.mydotfiles/com.ml4w.dotfiles/stable/.config/hypr/hypridle.conf /etc/skel/.mydotfiles/com.ml4w.dotfiles/stable/.config/hypr/hypridle.bak
-else
-    echo "ERROR: /etc/skel/.mydotfiles/com.ml4w.dotfiles/stable/.config/hypr/hypridle.conf doesn't exist."
-fi
-
 echo
 figlet -f smslant "Done!"
 echo ":: Installation Complete. Reboot and enjoy ML4W OS!"
