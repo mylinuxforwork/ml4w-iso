@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Configuration
-TAG="2.10.0"
-# VERSION="stable"
-VERSION="rolling"
+TAG="2.10.1"
+VERSION="stable"
+# VERSION="rolling"
 DOTFILES_SOURCE="com.ml4w.dotfiles.stable"
 GITHUB_DOTFILES="https://github.com/mylinuxforwork/dotfiles"
 BUILD_FOLDER="$HOME/builds/ml4w-iso"
