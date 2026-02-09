@@ -211,7 +211,7 @@ _build_iso() {
 
 # Start
 figlet -f smslant "ML4W OS ISO"
-echo ":: Starting ML4W OS ISO build..."
+echo ":: Starting build process..."
 
 _prepare
 _permissions
