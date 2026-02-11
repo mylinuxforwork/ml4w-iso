@@ -3,7 +3,7 @@
 
 iso_name="ml4w-os"
 iso_label="ML4W_OS_$(date --date="@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y%m)"
-iso_publisher="ML4W <https://mylinuxforwork.github.io/dotfiles>"
+iso_publisher="ML4W <https://ml4w.com/os>"
 iso_application="ML4W OS - Dotfiles for Hyprland"
 iso_version="$(date --date="@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y.%m.%d)"
 install_dir="arch"
