@@ -211,3 +211,7 @@ wlogout
 waypaper
 python-screeninfo
 yay-bin
+udisks2
+gvfs
+gvfs-mtp
+udiskie
