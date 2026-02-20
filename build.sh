@@ -118,16 +118,9 @@ _install_dotfiles() {
         echo ":: Removing $SKEL_FOLDER/.mydotfiles"
         rm -rf $SKEL_FOLDER/.mydotfiles
     fi
-    if [ -d $SKEL_FOLDER/.config ]; then
-        echo ":: Removing $SKEL_FOLDER/.config"
-        rm -rf $SKEL_FOLDER/.config
-    fi
 
     echo ":: Creating $SKEL_FOLDER/.mydotfiles/$DOTFILES_SOURCE"
     mkdir -p $SKEL_FOLDER/.mydotfiles/$DOTFILES_SOURCE
-
-    echo ":: Creating $SKEL_FOLDER/.config"
-    mkdir -p $SKEL_FOLDER/.config
 
     echo ":: Removing $CACHE_FOLDER"
     if [ -d $CACHE_FOLDER ]; then
