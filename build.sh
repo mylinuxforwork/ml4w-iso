@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuration
-TAG="2.10.1"
+TAG="2.11.0"
 VERSION="stable"
 # VERSION="rolling"
 DOTFILES_SOURCE="com.ml4w.dotfiles.stable"
@@ -24,7 +24,6 @@ FLATPAKS_ML4W=(
 )
 
 FLATPAKS_APPS=(
-    "com.ml4w.dotfilesinstaller"
 )
 
 # Functions
