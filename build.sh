@@ -180,9 +180,8 @@ _install_dotfiles() {
 
     echo ":: Copying binaries into .local/bin"
     mkdir -p $SKEL_FOLDER/.local/bin
-    cp $CACHE_FOLDER/setup/packages/matugen $SKEL_FOLDER/.local/bin/
-    cp $CACHE_FOLDER/setup/packages/eza $SKEL_FOLDER/.local/bin/
-    cp $CACHE_FOLDER/setup/packages/oh-my-posh $SKEL_FOLDER/.local/bin/
+    cp $HOME/.local/bin/matugen $SKEL_FOLDER/.local/bin/
+    cp $HOME/.local/bin/oh-my-posh $SKEL_FOLDER/.local/bin/
 
     echo ":: Copying fonts into .local/bin"
     mkdir -p $SKEL_FOLDER/.local/share/fonts
