@@ -2,8 +2,8 @@
 
 # Configuration
 TAG="2.11.0"
-VERSION="stable"
-# VERSION="rolling"
+# VERSION="stable"
+VERSION="rolling"
 DOTFILES_SOURCE="com.ml4w.dotfiles.stable"
 GITHUB_DOTFILES="https://github.com/mylinuxforwork/dotfiles"
 BUILD_FOLDER="$HOME/builds/ml4w-iso"
@@ -11,6 +11,7 @@ PROFILE_FOLDER="$BUILD_FOLDER/profile"
 OUT_FOLDER="$HOME/builds/ml4w-iso/out"
 PUBLIC_KEY=$(realpath "$HOME/ml4w-apps-public-key.asc")
 SKEL_FOLDER="$PROFILE_FOLDER/airootfs/etc/skel"
+ICON_DIR="$SKEL_FOLDER/.local/share/icons/"
 DOTFILES="$SKEL_FOLDER/.mydotfiles/com.ml4w.dotfiles.stable"
 CACHE_FOLDER="$HOME/.cache/ml4w-iso"
 TMP_FOLDER="$HOME/.cache/ml4w-tmp"
@@ -58,6 +59,47 @@ _permissions() {
 
     echo ":: Ensure permissions..."
     chmod +x $PROFILE_FOLDER/airootfs/usr/local/bin/install-ml4w-os
+}
+
+_install_icons() {
+    local temp_dir=$(mktemp -d -t ml4w-icons-XXXXXX)
+    mkdir -p $ICON_DIR
+
+    echo ":: Installing Kora Icons..."
+
+    # clone icons
+    git clone --depth 1 https://github.com/bikass/kora.git $temp_dir
+    echo ":: kora icon theme cloned into $temp_dir"
+
+    # copy icon folders
+    cp -rf $temp_dir/kora $ICON_DIR
+    cp -rf $temp_dir/kora-pgrey $ICON_DIR
+    echo ":: kora icon theme installed in $ICON_DIR"
+
+    # clean up
+    rm -rf $temp_dir
+}
+
+_install_cursors() {
+    local temp_dir=$(mktemp -d -t ml4w-cursors-XXXXXX)
+    bibata_url="https://github.com/ful1e5/Bibata_Cursor/releases/download/v2.0.7/"
+    mkdir -p $ICON_DIR
+
+    echo ":: Installing Bibata Cursor Theme..."
+
+    # download cursors
+    wget -P $temp_dir $bibata_url/Bibata-Modern-Amber.tar.xz
+    wget -P $temp_dir $bibata_url/Bibata-Modern-Classic.tar.xz
+    wget -P $temp_dir $bibata_url/Bibata-Modern-Ice.tar.xz
+
+    # extract cursor folders
+    tar -xf $temp_dir/Bibata-Modern-Amber.tar.xz -C $ICON_DIR
+    tar -xf $temp_dir/Bibata-Modern-Classic.tar.xz -C $ICON_DIR
+    tar -xf $temp_dir/Bibata-Modern-Ice.tar.xz -C $ICON_DIR
+
+    # clean up
+    rm -rf $temp_dir
+
 }
 
 _install_flatpaks() {
@@ -135,6 +177,17 @@ _install_dotfiles() {
     else
         git clone --depth 1 $GITHUB_DOTFILES $CACHE_FOLDER
     fi
+
+    echo ":: Copying binaries into .local/bin"
+    mkdir -p $SKEL_FOLDER/.local/bin
+    cp $CACHE_FOLDER/setup/packages/matugen $SKEL_FOLDER/.local/bin/
+    cp $CACHE_FOLDER/setup/packages/eza $SKEL_FOLDER/.local/bin/
+    cp $CACHE_FOLDER/setup/packages/oh-my-posh $SKEL_FOLDER/.local/bin/
+
+    echo ":: Copying fonts into .local/bin"
+    mkdir -p $SKEL_FOLDER/.local/share/fonts
+    cp -rf $CACHE_FOLDER/setup/fonts/* $SKEL_FOLDER/.local/share/fonts/
+
     echo ":: Copying $CACHE_FOLDER/dotfiles/. to $SKEL_FOLDER/.mydotfiles/$DOTFILES_SOURCE"
     cp -rf $CACHE_FOLDER/dotfiles/. $SKEL_FOLDER/.mydotfiles/$DOTFILES_SOURCE
 
@@ -211,6 +264,8 @@ _install_flatpaks
 _install_sddm_theme
 _install_dotfiles
 _install_ohmyzsh
+_install_cursors
+_install_icons
 _build_iso
 
 echo ":: Done! Check the ./out folder for your ISO."
