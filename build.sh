@@ -9,23 +9,10 @@ GITHUB_DOTFILES="https://github.com/mylinuxforwork/dotfiles"
 BUILD_FOLDER="$HOME/builds/ml4w-iso"
 PROFILE_FOLDER="$BUILD_FOLDER/profile"
 OUT_FOLDER="$HOME/builds/ml4w-iso/out"
-PUBLIC_KEY=$(realpath "$HOME/ml4w-apps-public-key.asc")
 SKEL_FOLDER="$PROFILE_FOLDER/airootfs/etc/skel"
 ICON_DIR="$SKEL_FOLDER/.local/share/icons/"
 DOTFILES="$SKEL_FOLDER/.mydotfiles/com.ml4w.dotfiles.stable"
 CACHE_FOLDER="$HOME/.cache/ml4w-iso"
-TMP_FOLDER="$HOME/.cache/ml4w-tmp"
-
-FLATPAKS_ML4W=(
-    "com.ml4w.welcome"
-    "com.ml4w.settings"
-    "com.ml4w.calendar"
-    "com.ml4w.sidebar"
-    "com.ml4w.hyprlandsettings"
-)
-
-FLATPAKS_APPS=(
-)
 
 # Functions
 _prepare() {
@@ -62,6 +49,8 @@ _permissions() {
 }
 
 _install_icons() {
+    figlet -f smslant "Icons"
+
     local temp_dir=$(mktemp -d -t ml4w-icons-XXXXXX)
     mkdir -p $ICON_DIR
 
@@ -80,7 +69,32 @@ _install_icons() {
     rm -rf $temp_dir
 }
 
+_install_dotfiles_settings() {
+    figlet -f smslant "ML4W Dotfiles Settings"
+
+    local temp_dir=$(mktemp -d -t ml4w-dotfiles-settings-XXXXXX)
+
+    echo ":: Installing ML4W Dotfiles Settings..."
+
+    # Create folders
+    mkdir -p $SKEL_FOLDER/.local/bin
+    mkdir -p $SKEL_FOLDER/.local/share/ml4w-dotfiles-settings
+
+    # clone repo
+    git clone --depth 1 https://github.com/mylinuxforwork/ml4w-dotfiles-settings $temp_dir
+
+    # copy files
+    cp $temp_dir/bin/ml4w-dotfiles-settings $SKEL_FOLDER/.local/bin/
+    cp -rf $temp_dir/lib/. $SKEL_FOLDER/.local/share/ml4w-dotfiles-settings
+    echo ":: ML4W Dotfiles Settings installed in $SKEL_FOLDER/.local/bin/ and $SKEL_FOLDER/.local/share/ml4w-dotfiles-settings"
+
+    # clean up
+    rm -rf $temp_dir
+}
+
 _install_cursors() {
+    figlet -f smslant "Cursors"
+
     local temp_dir=$(mktemp -d -t ml4w-cursors-XXXXXX)
     bibata_url="https://github.com/ful1e5/Bibata_Cursor/releases/download/v2.0.7/"
     mkdir -p $ICON_DIR
@@ -102,58 +116,27 @@ _install_cursors() {
 
 }
 
-_install_flatpaks() {
-    figlet -f smslant "Flatpaks"
+_install_binaries() {
+    figlet -f smslant "Binaries"
+    echo ":: Copying binaries into .local/bin"
 
-    # Clean up
-    if [ -d $PROFILE_FOLDER/airootfs/var/lib/flatpak ]; then
-        sudo rm -rf $PROFILE_FOLDER/airootfs/var/lib/flatpak
-    fi    
+    # Create folders
+    mkdir -p $SKEL_FOLDER/.local/bin
+    mkdir -p $SKEL_FOLDER/.local/share
+    
+    # Matugen
+    cp $HOME/.local/bin/matugen $SKEL_FOLDER/.local/bin/
+    echo ":: Matugen installed in $SKEL_FOLDER/.local/bin/"
 
-    # Backup current Flatpak environment variables
-    OLD_SYSTEM_DIR="$FLATPAK_SYSTEM_DIR"
-    OLD_CONFIG_DIR="$FLATPAK_CONFIG_DIR"
-    OLD_DBUS="$DBUS_SYSTEM_BUS_ADDRESS"
-
-    # Redirect Flatpak and disable D-Bus (forces local file writing)
-    export FLATPAK_SYSTEM_DIR="$PROFILE_FOLDER/airootfs/var/lib/flatpak"
-    export FLATPAK_CONFIG_DIR="$PROFILE_FOLDER/airootfs/etc/flatpak"
-    export DBUS_SYSTEM_BUS_ADDRESS=""
-
-    echo ":: Staging Flatpaks in: $FLATPAK_SYSTEM_DIR..."
-    mkdir -p "$FLATPAK_SYSTEM_DIR" "$FLATPAK_CONFIG_DIR"
-
-    echo ":: Adding Remotes..."
-    sudo -E flatpak remote-add --system --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-    if [ -f "$PUBLIC_KEY" ]; then
-        sudo -E flatpak remote-add --system --if-not-exists ml4w-repo https://mylinuxforwork.github.io/ml4w-flatpak-repo/ml4w-apps.flatpakrepo --gpg-import="$PUBLIC_KEY"
-    else
-        echo "Warning: GPG key not found. Adding repo without it..."
-        sudo -E flatpak remote-add --system --if-not-exists ml4w-repo https://mylinuxforwork.github.io/ml4w-flatpak-repo/ml4w-apps.flatpakrepo
-    fi
-
-    echo ":: Installing ML4W Flatpak Apps..."
-    for app in "${FLATPAKS_ML4W[@]}"; do
-        echo "   --> Installing $app"
-        sudo -E flatpak install --system ml4w-repo "$app" -y --noninteractive
-    done
-
-    echo ":: Installing Flatpak Apps..."
-    for app in "${FLATPAKS_APPS[@]}"; do
-        echo "   --> Installing $app"
-        sudo -E flatpak install --system "$app" -y --noninteractive
-    done
-
-    echo ":: Cleaning up environment variables..."
-    export FLATPAK_SYSTEM_DIR="$OLD_SYSTEM_DIR"
-    export FLATPAK_CONFIG_DIR="$OLD_CONFIG_DIR"
-    export DBUS_SYSTEM_BUS_ADDRESS="$OLD_DBUS"
-
-    echo ":: Done! Flatpaks are now prepared in $FLATPAK_SYSTEM_DIR"
+    # oh-my-posh
+    cp $HOME/.local/bin/oh-my-posh $SKEL_FOLDER/.local/bin/
+    echo ":: Oh-My-Posh installed in $SKEL_FOLDER/.local/bin/"
 }
 
 _install_dotfiles() {
     figlet -f smslant "Dotfiles"
+
+    local temp_dir=$(mktemp -d -t ml4w-dotfiles-XXXXXX)
 
     # Clean up
     if [ -d $SKEL_FOLDER/.mydotfiles ]; then
@@ -173,27 +156,27 @@ _install_dotfiles() {
 
     echo ":: Cloning $GITHUB_DOTFILES"
     if [ $VERSION == "stable" ]; then
-        git clone --depth 1 --branch $TAG $GITHUB_DOTFILES $CACHE_FOLDER
+        git clone --depth 1 --branch $TAG $GITHUB_DOTFILES $temp_dir
     else
-        git clone --depth 1 $GITHUB_DOTFILES $CACHE_FOLDER
+        git clone --depth 1 $GITHUB_DOTFILES $temp_dir
     fi
 
-    echo ":: Copying binaries into .local/bin"
-    mkdir -p $SKEL_FOLDER/.local/bin
-    cp $HOME/.local/bin/matugen $SKEL_FOLDER/.local/bin/
-    cp $HOME/.local/bin/oh-my-posh $SKEL_FOLDER/.local/bin/
-
+    # Installing Fonts
     echo ":: Copying fonts into .local/bin"
     mkdir -p $SKEL_FOLDER/.local/share/fonts
-    cp -rf $CACHE_FOLDER/setup/fonts/* $SKEL_FOLDER/.local/share/fonts/
+    cp -rf $temp_dir/setup/fonts/* $SKEL_FOLDER/.local/share/fonts/
 
-    echo ":: Copying $CACHE_FOLDER/dotfiles/. to $SKEL_FOLDER/.mydotfiles/$DOTFILES_SOURCE"
-    cp -rf $CACHE_FOLDER/dotfiles/. $SKEL_FOLDER/.mydotfiles/$DOTFILES_SOURCE
+    # Create ml4w-dotfiles-installer folder in .config and set stable to active
+    echo ":: Writing $DOTFILES_SOURCE to $SKEL_FOLDER/.config/ml4w-dotfiles-installer/active.json"
+    mkdir -p $SKEL_FOLDER/.config/ml4w-dotfiles-installer
+    touch $SKEL_FOLDER/.config/ml4w-dotfiles-installer/active.json
+    echo "{\"active\":\"$DOTFILES_SOURCE\"}" > "$active_file"
 
-    echo ":: Copying local ~/.mydotfiles/$DOTFILES_SOURCE/config.dotinst to $SKEL_FOLDER/.mydotfiles/$DOTFILES_SOURCE"
-    cp ~/.mydotfiles/$DOTFILES_SOURCE/config.dotinst $SKEL_FOLDER/.mydotfiles/$DOTFILES_SOURCE
+    # Copy dotfiles
+    echo ":: Copying $temp_dir/dotfiles/. to $SKEL_FOLDER/.mydotfiles/$DOTFILES_SOURCE"
+    cp -rf $temp_dir/dotfiles/. $SKEL_FOLDER/.mydotfiles/$DOTFILES_SOURCE
 
-    # Check dotfiles root
+    # Create symlinks for dotfiles root
     echo ":: Creating symlinks..."
     files=$(ls -a $DOTFILES)
     for f in $files; do
@@ -208,7 +191,7 @@ _install_dotfiles() {
         fi
     done
 
-    # Check .config
+    # Create symlinks for .config
     files=$(ls -a $DOTFILES/.config)
     for f in $files; do
         if [ ! "$f" == "." ] && [ ! "$f" == ".." ]; then
@@ -217,28 +200,30 @@ _install_dotfiles() {
         fi
     done
 
+    # clean up
+    rm -rf $temp_dir
+
     echo ":: Done! Dotfiles are installed in $SKEL_FOLDER"
 }
 
 _install_sddm_theme() {
+    figlet -f smslant "SDDM Theme"
+
     echo ":: Starting installation of the ML4W SDDM theme..."
-    
-    echo ":: Creating temporary directory..."
-    rm -rf $TMP_FOLDER
-    mkdir -p $TMP_FOLDER
+    local temp_dir=$(mktemp -d -t ml4w-sddm-XXXXXX)
     
     echo ":: Cloning theme into temporary directory..."
-    git clone --depth 1 https://github.com/mylinuxforwork/ml4w-sddm $TMP_FOLDER/ml4w-sddm
+    git clone --depth 1 https://github.com/mylinuxforwork/ml4w-sddm $temp_dir
 
     echo ":: Copy theme to sddm folder..."
     sudo mkdir -p $PROFILE_FOLDER/airootfs/usr/share/sddm/themes/ml4w/
-    sudo cp -rf $TMP_FOLDER/ml4w-sddm/. $PROFILE_FOLDER/airootfs/usr/share/sddm/themes/ml4w/
+    sudo cp -rf $temp_dir/. $PROFILE_FOLDER/airootfs/usr/share/sddm/themes/ml4w/
 
     echo ":: Copy sddm.conf..."
-    sudo cp -rf $TMP_FOLDER/ml4w-sddm/sddm.conf $PROFILE_FOLDER/airootfs/etc
+    sudo cp -rf $temp_dir/sddm.conf $PROFILE_FOLDER/airootfs/etc
 
-    echo ":: Cleaning up..."
-    rm -rf $TMP_FOLDER
+    # clean up
+    rm -rf $temp_dir
 
     echo ":: ML4W SDDM theme installed succesfully"
 }
@@ -259,11 +244,12 @@ echo ":: Starting build process..."
 
 _prepare
 _permissions
-_install_flatpaks
 _install_sddm_theme
 _install_dotfiles
+_install_binaries
 _install_ohmyzsh
 _install_cursors
+_install_dotfiles_settings
 _install_icons
 _build_iso
 

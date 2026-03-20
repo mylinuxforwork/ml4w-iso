@@ -207,8 +207,8 @@ wireplumber
 xorg-xhost
 libxkbcommon
 firefox
+quickshell
 # AUR Packages from ml4w-arch-repo
-wlogout
 waypaper
 python-screeninfo
 yay-bin
