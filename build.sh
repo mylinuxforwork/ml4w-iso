@@ -124,10 +124,6 @@ _install_binaries() {
     mkdir -p $SKEL_FOLDER/.local/bin
     mkdir -p $SKEL_FOLDER/.local/share
     
-    # Matugen
-    cp $HOME/.local/bin/matugen $SKEL_FOLDER/.local/bin/
-    echo ":: Matugen installed in $SKEL_FOLDER/.local/bin/"
-
     # oh-my-posh
     cp $HOME/.local/bin/oh-my-posh $SKEL_FOLDER/.local/bin/
     echo ":: Oh-My-Posh installed in $SKEL_FOLDER/.local/bin/"

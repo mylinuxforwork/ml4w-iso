@@ -208,6 +208,7 @@ xorg-xhost
 libxkbcommon
 firefox
 quickshell
+matugen
 # AUR Packages from ml4w-arch-repo
 waypaper
 python-screeninfo
