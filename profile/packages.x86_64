@@ -194,7 +194,7 @@ tesseract-data-eng
 otf-font-awesome
 ttf-firacode-nerd
 ttf-jetbrains-mono-nerd
-swww
+awww
 base-devel
 sddm
 qt6-svg
@@ -209,9 +209,8 @@ libxkbcommon
 firefox
 quickshell
 matugen
+cargo
 # AUR Packages from ml4w-arch-repo
-waypaper
-python-screeninfo
 yay-bin
 udisks2
 gvfs
