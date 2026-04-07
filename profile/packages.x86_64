@@ -210,9 +210,13 @@ firefox
 quickshell
 matugen
 cargo
-# AUR Packages from ml4w-arch-repo
-yay-bin
 udisks2
 gvfs
 gvfs-mtp
 udiskie
+git
+make
+curl
+jq
+# AUR Packages from ml4w-arch-repo
+yay-bin
