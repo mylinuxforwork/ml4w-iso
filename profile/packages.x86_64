@@ -220,5 +220,3 @@ curl
 jq
 gnome-keyring
 libsecret
-# AUR Packages from ml4w-arch-repo
-yay-bin
