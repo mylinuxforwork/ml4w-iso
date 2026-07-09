@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Configuration
-TAG="2.13.1"
+TAG="2.14.1"
 # VERSION="stable"
 VERSION="rolling"
 DOTFILES_SOURCE="com.ml4w.dotfiles.stable"
