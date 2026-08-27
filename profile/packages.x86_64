@@ -220,3 +220,6 @@ curl
 jq
 gnome-keyring
 libsecret
+ttf-font-awesome
+ttf-nerd-fonts-symbols
+noto-fonts-emoji
